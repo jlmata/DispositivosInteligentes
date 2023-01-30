@@ -3,7 +3,7 @@ import csv
 
 # Funcion utilizada para leer los datos de un archivo
 def read_file():
-    with open("test.csv", 'r') as file:
+    with open("Datos.txt", 'r') as file:
         csv_reader = csv.reader(file)
         list1 = []
         list2 = []
