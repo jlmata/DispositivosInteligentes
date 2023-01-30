@@ -67,18 +67,47 @@ def result(board, action):
 
 # Calcula la distancia Manhattan entre el estado actual y el final
 def manhattan(board, final_board):
-    h = 0
+    manhattan = 0
     for i in range(4):
         for j in range(4):
             if board[i][j] != final_board[i][j]:
-                h += 1
-    return h
+                x, y = divmod(board[i][j]-1, 4)
+                manhattan += abs(i-x) + abs(j-y)
+    return manhattan
+
+# Calcula el maximo entre la distancia manhattan y el numero de celdas mal colocadas
+def max_manhattan_misplaced(board, final_board):
+    manhattan = 0
+    misplaced = 0
+    for i in range(4):
+        for j in range(4):
+            if board[i][j] != final_board[i][j]:
+                x, y = divmod(board[i][j]-1, 4)
+                manhattan += abs(i-x) + abs(j-y)
+                misplaced += 1
+    return max(manhattan, misplaced)
 
 # Implementacion de algoritmo A*
 def a_star(initial_board, final_board):
+
+    # Menú de Selección de Heurística
+    print("Selecciona una Heurística: ")
+    print("1. Distancia Manhattan")
+    print("2. Máximo entre Manhattan y Celdas Mal Colocadas")
+
+    metric = int(input())
+
     heap = []
+
     # Agregar al heap el estado inicial, junto con el valor de la heuristica
-    heapq.heappush(heap, State(initial_board, 0, manhattan(initial_board, final_board)))
+    if metric == 1:
+        heapq.heappush(heap, State(initial_board, 0, manhattan(initial_board, final_board)))
+    elif metric == 2:
+        heapq.heappush(heap, State(initial_board, 0, max_manhattan_misplaced(initial_board, final_board)))
+    else:
+        print("Opción Inválida. Intenta de nuevo.")
+        exit()
+    
     visited = set() # Variable que almacena los estados visitados
     while heap:
         current_state = heapq.heappop(heap)
@@ -89,7 +118,11 @@ def a_star(initial_board, final_board):
             new_board = result(current_state.board, action) # Genera un nuevo estado para cada acción posible
             if tuple(map(tuple, new_board)) not in visited: # Se asegura que el nuevo estado no haya sido visitado
                 g = current_state.g + 1
-                h = manhattan(new_board, final_board)
+                if metric == 1:
+                    h = manhattan(new_board, final_board)
+                else:
+                    h = max_manhattan_misplaced(new_board, final_board)
+                
                 heapq.heappush(heap, State(new_board, g, h, current_state))
     return None
 
